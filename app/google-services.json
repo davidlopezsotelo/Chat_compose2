@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "313641142495",
+    "project_id": "chatcompose2-a2660",
+    "storage_bucket": "chatcompose2-a2660.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313641142495:android:38a084bedcd2a90d39c16a",
+        "android_client_info": {
+          "package_name": "com.dls.chatcompose2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "313641142495-reqd1nqnemj3d82nmc3u5thtmt68decv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dls.chatcompose2",
+            "certificate_hash": "e6f241405ab3677f1666eb2103788f93e57440dc"
+          }
+        },
+        {
+          "client_id": "313641142495-80q106s3t6gqvm9umssjvs6uoogbtodj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAi9Qhjf9llOoO-4O0uBI7WcykGGN1Ejw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "313641142495-80q106s3t6gqvm9umssjvs6uoogbtodj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
