@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.dls.chatcompose2" />
+                  <option name="mobileSdkAppId" value="1:313641142495:android:38a084bedcd2a90d39c16a" />
+                  <option name="projectId" value="chatcompose2-a2660" />
+                  <option name="projectNumber" value="313641142495" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

@@ -12,6 +12,15 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 // Módulo de Hilt que proporciona instancias singleton de los servicios de Firebase
+/*
+Este módulo se utiliza para proporcionar instancias singleton de los servicios de Firebase a través de Hilt.
+Cada vez que Hilt necesita una instancia de un servicio, como FirebaseAuth, FirebaseFirestore, etc., se proporcionará
+esta instancia singleton.
+ */
+
+/**
+ * Módulo de Hilt que proporciona instancias singleton de los servicios de Firebase.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {

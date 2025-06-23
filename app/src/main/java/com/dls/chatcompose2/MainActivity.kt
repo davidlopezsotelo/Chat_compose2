@@ -1,47 +1,39 @@
 package com.dls.chatcompose2
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import com.dls.chatcompose2.ui.theme.ChatCompose2Theme
+import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * MainActivity es el punto de entrada de la aplicación.
+ * Se encarga de aplicar el tema y cargar la navegación principal (NavGraph).
+ */
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Activamos modo edge-to-edge en dispositivos modernos
         enableEdgeToEdge()
+
+        Log.d("MainActivity", "Aplicación iniciada - onCreate")
+
+        // Cargamos el contenido Compose
         setContent {
             ChatCompose2Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                // Surface actúa como contenedor del fondo con el color del tema
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    // Aquí se iniciará el flujo de navegación de la app
+                    AppEntryPoint()
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ChatCompose2Theme {
-        Greeting("Android")
     }
 }
