@@ -14,11 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dls.chatcompose2.presentation.register.RegisterViewModel
 import com.dls.chatcompose2.ui.navigation.Screen
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(navController: NavController,
+                   viewModel: RegisterViewModel = hiltViewModel()) {
+    Log.d("RegisterScreen", "RegisterScreen cargado correctamente")
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
