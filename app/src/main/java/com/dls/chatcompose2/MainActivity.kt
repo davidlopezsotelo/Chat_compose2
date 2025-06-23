@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.navigation.compose.rememberNavController
+import com.dls.chatcompose2.ui.navigation.NavGraph
 import com.dls.chatcompose2.ui.theme.ChatCompose2Theme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,6 +35,8 @@ class MainActivity : ComponentActivity() {
                     // Aquí se iniciará el flujo de navegación de la app
                     AppEntryPoint()
                 }
+                val navController = rememberNavController()
+                NavGraph(navController = navController)
             }
         }
     }

@@ -59,7 +59,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Google Identity Services (SignInCredential, etc.)
-    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation(libs.play.services.auth)
 
 
 
