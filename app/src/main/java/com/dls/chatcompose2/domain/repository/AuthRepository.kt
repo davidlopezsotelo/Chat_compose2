@@ -46,4 +46,5 @@ interface AuthRepository {
      * @return Result con éxito o error.
      */
     suspend fun signInWithGoogle(credential: AuthCredential): Result<Unit>
+
 }

@@ -1,42 +1,133 @@
 package com.dls.chatcompose2.ui.screens.auth
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dls.chatcompose2.presentation.register.RegisterViewModel
-import com.dls.chatcompose2.ui.navigation.Screen
+import androidx.compose.runtime.getValue
+
 
 @Composable
-fun RegisterScreen(navController: NavController,
-                   viewModel: RegisterViewModel = hiltViewModel()) {
-    Log.d("RegisterScreen", "RegisterScreen cargado correctamente")
+fun RegisterScreen(
+    navController: NavController,
+    registerViewModel: RegisterViewModel = hiltViewModel()
+) {
+    // Estados locales para los campos del formulario
+    val name = remember { mutableStateOf("") }
+    val email = remember { mutableStateOf("") }
+    val password = remember { mutableStateOf("") }
+
+    // Obtenemos el estado actual del ViewModel
+    val uiState by registerViewModel.uiState.collectAsState()
+
+
+
+    // Layout principal del formulario
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
-        Text(text = "Register Screen", style = MaterialTheme.typography.headlineSmall)
+        Text("Registro de usuario", style = MaterialTheme.typography.headlineMedium)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Campo de nombre
+        OutlinedTextField(
+            value = name.value,
+            onValueChange = { name.value = it },
+            label = { Text("Nombre") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Campo de email
+        OutlinedTextField(
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Campo de contraseña
+        OutlinedTextField(
+            value = password.value,
+            onValueChange = { password.value = it },
+            label = { Text("Contraseña") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation()
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {
-            Log.d("RegisterScreen", "Navegando a Login")
-            navController.navigate(Screen.Login.route)
-        }) {
-            Text("Ya tengo cuenta")
+        // Botón de registro
+        Button(
+            onClick = {
+                Log.d("RegisterScreen", "Botón de registro pulsado")
+                registerViewModel.registerUser(name.value, email.value, password.value)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Registrar")
+        }
+
+        // Indicador de carga
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+
+        // Mensaje de error si ocurre algún fallo
+        uiState.errorMessage?.let { error ->
+            Text(
+                text = error,
+                color = Color.Red,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+
+        // Navegación automática a Login tras éxito
+        if (uiState.isSuccess) {
+            Log.d("RegisterScreen", "Registro exitoso, navegando a Login")
+            LaunchedEffect(true) {
+                navController.navigate("login") {
+                    popUpTo("register") { inclusive = true }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Botón para volver a Login
+        TextButton(
+            onClick = {
+                Log.d("RegisterScreen", "Volviendo a Login")
+                navController.navigate("login")
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("¿Ya tienes cuenta? Inicia sesión")
         }
     }
 }
+
