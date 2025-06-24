@@ -1,6 +1,5 @@
-// presentation/register/RegisterViewModel.kt
-package com.dls.chatcompose2.presentation.register
 
+package com.dls.chatcompose2.presentation.register
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -9,56 +8,57 @@ import com.dls.chatcompose2.domain.use_case.auth.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 /**
  * ViewModel que gestiona la lógica de registro de usuarios.
- * Se conecta con el caso de uso RegisterUseCase y expone el estado de la UI mediante un StateFlow.
+ * Se conecta con RegisterUseCase y expone el estado de la UI mediante un StateFlow.
  */
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase
 ) : ViewModel() {
 
-    // Estado interno mutable de la pantalla de registro
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState
 
     init {
-        Log.d("RegisterViewModel", "RegisterViewModel creado correctamente")
+        Log.d("RegisterViewModel", "✅ RegisterViewModel creado correctamente")
     }
 
     /**
      * Inicia el proceso de registro con los datos proporcionados.
-     * @param name Nombre del usuario
-     * @param email Correo electrónico
-     * @param password Contraseña
+     * Actualiza el estado de la UI según el resultado.
      */
     fun registerUser(name: String, email: String, password: String) {
         viewModelScope.launch {
-            Log.d("RegisterViewModel", "Intentando registrar usuario con email: $email")
-            _uiState.value = RegisterUiState(isLoading = true)
+            Log.d("RegisterViewModel", "🔄 Intentando registrar usuario con email: $email")
+
+            _uiState.update { it.copy(isLoading = true, errorMessage = null, isSuccess = false) }
 
             val result = registerUseCase(name, email, password)
 
-            _uiState.value = if (result.isSuccess) {
-                Log.d("RegisterViewModel", "Registro exitoso para: $email")
-                RegisterUiState(isSuccess = true)
-            } else {
-                val errorMsg = result.exceptionOrNull()?.localizedMessage ?: "Error desconocido"
-                Log.e("RegisterViewModel", "Error al registrar: $errorMsg")
-                RegisterUiState(errorMessage = errorMsg)
-            }
+            result.fold(
+                onSuccess = {
+                    Log.d("RegisterViewModel", "✅ Registro exitoso para: $email")
+                    _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                },
+                onFailure = { error ->
+                    val errorMsg = error.localizedMessage ?: "❌ Error desconocido"
+                    Log.e("RegisterViewModel", "⛔ Error al registrar: $errorMsg")
+                    _uiState.update { it.copy(isLoading = false, errorMessage = errorMsg) }
+                }
+            )
         }
     }
 
     /**
-     * Restablece el estado de la UI al valor inicial (útil después de un registro o para reiniciar errores).
+     * Restablece el estado de la UI a su valor por defecto.
      */
     fun resetState() {
+        Log.d("RegisterViewModel", "♻️ Reiniciando estado de UI")
         _uiState.value = RegisterUiState()
     }
 }

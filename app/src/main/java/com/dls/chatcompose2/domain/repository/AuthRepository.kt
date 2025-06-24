@@ -2,8 +2,10 @@
 
 package com.dls.chatcompose2.domain.repository
 
+import android.net.Uri
 import com.dls.chatcompose2.domain.model.User
 import com.google.android.gms.auth.api.identity.SignInCredential
+import com.google.firebase.auth.FirebaseUser
 
 /**
  * Interfaz del repositorio de autenticación.
@@ -46,5 +48,10 @@ interface AuthRepository {
      */
     suspend fun signInWithGoogle(credential: SignInCredential): Result<Unit>
 
+    fun getCurrentUser(): FirebaseUser?
+
+    suspend fun getUserFromFirestore(userId: String): Result<User>
+
+    suspend fun uploadProfilePicture(uri: Uri, userId: String): String
 
 }

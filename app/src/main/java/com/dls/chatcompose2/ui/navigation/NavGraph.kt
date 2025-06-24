@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dls.chatcompose2.ui.screens.auth.LoginScreen
 import com.dls.chatcompose2.ui.screens.auth.RegisterScreen
+import com.dls.chatcompose2.ui.screens.auth.UserEditScreen
 import com.dls.chatcompose2.ui.screens.home.HomeScreen
 
 
@@ -26,6 +27,13 @@ fun NavGraph(navController: NavHostController) {
         composable(route = Screen.Home.route) {
             Log.d("NavGraph", "Mostrando HomeScreen")
             HomeScreen(navController = navController)
+        }
+
+        composable("edit_user") {
+            UserEditScreen(
+                onUserUpdated = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() }
+            )
         }
     }
 }

@@ -3,11 +3,13 @@
 package com.dls.chatcompose2.data.repository
 
 import android.content.IntentSender
+import android.net.Uri
 import android.util.Log
 import com.dls.chatcompose2.domain.model.User
 import com.dls.chatcompose2.domain.repository.AuthRepository
 import com.google.android.gms.auth.api.identity.SignInCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -80,6 +82,31 @@ class AuthRepositoryImpl @Inject constructor(
         } else {
             Result.failure(Exception("ID Token de Google inválido"))
         }
+    }
+
+    override fun getCurrentUser(): FirebaseUser? {
+        return auth.currentUser
+    }
+
+    override suspend fun getUserFromFirestore(userId: String): Result<User> {
+        return try {
+            val snapshot = firestore.collection("users").document(userId).get().await()
+            val user = snapshot.toObject(User::class.java)
+            if (user != null) {
+                Result.success(user)
+            } else {
+                Result.failure(Exception("Usuario no encontrado"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun uploadProfilePicture(
+        uri: Uri,
+        userId: String
+    ): String {
+        TODO("Not yet implemented")
     }
 
 }

@@ -19,6 +19,8 @@ import com.dls.chatcompose2.ui.navigation.Screen
 
 @Composable
 fun HomeScreen(navController: NavController) {
+
+
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -35,6 +37,14 @@ fun HomeScreen(navController: NavController) {
             }
         }) {
             Text("Cerrar sesión")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {
+            Log.d("HomeScreen", "Editar perfil")
+            navController.navigate("edit_user")
+        }) {
+            Text("Editar perfil")
         }
     }
 }
