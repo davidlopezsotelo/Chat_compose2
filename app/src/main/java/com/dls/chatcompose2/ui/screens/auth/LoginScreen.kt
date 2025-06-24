@@ -1,5 +1,6 @@
 package com.dls.chatcompose2.ui.screens.auth
 
+import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,23 +30,25 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dls.chatcompose2.data.firebase.GoogleSignInClient
 import com.dls.chatcompose2.presentation.login.LoginViewModel
-import com.dls.chatcompose2.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
-@Composable
-fun LoginScreen(navController: NavController,
-                viewModel: LoginViewModel = hiltViewModel()) {
-    Log.d("LoginScreen", "LoginScreen cargado correctamente")
 
-    // Variables locales para entrada de usuario
+@Composable
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val googleSignInClient = remember { activity?.let { GoogleSignInClient(it) } }
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val loginState by viewModel.loginState.collectAsState()
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
-    // UI principal
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,11 +56,10 @@ fun LoginScreen(navController: NavController,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Iniciar sesión", style = MaterialTheme.typography.headlineSmall)
+        Text("Iniciar sesión", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Campo de texto para email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -68,7 +70,6 @@ fun LoginScreen(navController: NavController,
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de texto para contraseña
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -80,11 +81,10 @@ fun LoginScreen(navController: NavController,
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para iniciar sesión
         Button(
             onClick = {
-                Log.d("LoginScreen", "Iniciando login...")
-                scope.launch {
+                Log.d("LoginScreen", "Iniciando login con email y contraseña")
+                coroutineScope.launch {
                     viewModel.login(email.trim(), password)
                 }
             },
@@ -93,7 +93,19 @@ fun LoginScreen(navController: NavController,
             Text("Entrar")
         }
 
-        // Texto de error si ocurre
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {
+            coroutineScope.launch {
+                googleSignInClient?.getSignInIntent()?.let { intent ->
+                    Log.d("LoginScreen", "Iniciando intent de Google Sign-In")
+                    viewModel.onGoogleSignInIntent(intent)
+                }
+            }
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text("Iniciar sesión con Google")
+        }
+
         if (loginState.error != null) {
             Text(
                 text = loginState.error ?: "",
@@ -102,14 +114,12 @@ fun LoginScreen(navController: NavController,
             )
         }
 
-        // Mostrar progreso mientras se realiza el login
         if (loginState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Navegar al registro
         TextButton(onClick = {
             Log.d("LoginScreen", "Navegando a Register")
             navController.navigate("register")
@@ -118,7 +128,6 @@ fun LoginScreen(navController: NavController,
         }
     }
 
-    // Si login fue exitoso, navegar al Home
     LaunchedEffect(loginState.success) {
         if (loginState.success) {
             Log.d("LoginScreen", "Login exitoso, navegando a Home")
@@ -128,3 +137,6 @@ fun LoginScreen(navController: NavController,
         }
     }
 }
+
+
+

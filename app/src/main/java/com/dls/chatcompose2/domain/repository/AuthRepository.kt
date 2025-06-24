@@ -2,9 +2,9 @@
 
 package com.dls.chatcompose2.domain.repository
 
+import android.content.IntentSender
 import com.dls.chatcompose2.domain.model.User
 import com.google.android.gms.auth.api.identity.SignInCredential
-import com.google.firebase.auth.AuthCredential
 
 /**
  * Interfaz del repositorio de autenticación.
@@ -45,6 +45,7 @@ interface AuthRepository {
      * Inicia sesión con una cuenta de Google a través del SignInCredential.
      * @return Result con éxito o error.
      */
-    suspend fun signInWithGoogle(credential: AuthCredential): Result<Unit>
+    suspend fun signInWithGoogle(credential: SignInCredential): Result<Unit>
+    fun signInWithGoogleIntent(intent: IntentSender): Result<Unit>
 
 }

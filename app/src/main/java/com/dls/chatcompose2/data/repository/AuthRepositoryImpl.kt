@@ -1,11 +1,14 @@
+@file:Suppress("DEPRECATION")
 
 package com.dls.chatcompose2.data.repository
 
+import android.content.IntentSender
 import android.util.Log
 import com.dls.chatcompose2.domain.model.User
 import com.dls.chatcompose2.domain.repository.AuthRepository
-import com.google.firebase.auth.AuthCredential
+import com.google.android.gms.auth.api.identity.SignInCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -41,27 +44,6 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signInWithGoogle(credential: AuthCredential): Result<Unit> {
-        return try {
-            auth.signInWithCredential(credential).await()
-            val firebaseUser = auth.currentUser
-            if (firebaseUser != null) {
-                val user = User(
-                    uid = firebaseUser.uid,
-                    name = firebaseUser.displayName ?: "",
-                    email = firebaseUser.email ?: "",
-                    profilePictureUrl = firebaseUser.photoUrl?.toString()
-                )
-                saveUserToFirestore(user)
-                Log.d("AuthRepository", "Google Sign-in successful for ${user.email}")
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Google Sign-in failed: ${e.message}")
-            Result.failure(e)
-        }
-    }
-
     override suspend fun logout() {
         Log.d("AuthRepository", "Logging out")
         auth.signOut()
@@ -72,7 +54,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveUserToFirestore(user: User): Result<Unit> {
-       return try {
+        return try {
             firestore.collection("users")
                 .document(user.uid)
                 .set(user)
@@ -81,7 +63,32 @@ class AuthRepositoryImpl @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e("AuthRepository", "Error saving user to Firestore: ${e.message}")
-           Result.failure(e)
+            Result.failure(e)
         }
+    }
+
+    override suspend fun signInWithGoogle(credential: SignInCredential): Result<Unit> {
+        val googleIdToken = credential.googleIdToken
+        return if (googleIdToken != null) {
+            val firebaseCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
+            try {
+                auth.signInWithCredential(firebaseCredential).await()
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        } else {
+            Result.failure(Exception("ID Token de Google inválido"))
+        }
+    }
+
+    override fun signInWithGoogleIntent(intent: IntentSender): Result<Unit> {
+        return try {
+            auth.signInWithCustomToken(intent.toString())
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
     }
 }

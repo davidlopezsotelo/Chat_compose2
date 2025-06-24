@@ -1,6 +1,9 @@
+@file:Suppress("DEPRECATION")
+
 package com.dls.chatcompose2.domain.use_case.auth
 
 import com.dls.chatcompose2.domain.repository.AuthRepository
+import com.google.android.gms.auth.api.identity.SignInCredential
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,4 +27,13 @@ class LoginUseCase @Inject constructor(
             repository.loginWithEmailAndPassword(email, password)
         }
     }
+
+    suspend fun signInWithGoogle(credential: SignInCredential): Result<Unit> {
+        return repository.signInWithGoogle(credential)
+    }
+
 }
+
+
+
+

@@ -9,5 +9,5 @@ data class User (
     val uid: String = "",              // ID único del usuario (UID de Firebase Auth)
     val name: String = "",             // Nombre completo del usuario
     val email: String = "",            // Dirección de correo electrónico
-    val profilePictureUrl: String? = null // URL de la foto de perfil, puede ser nula
+    val photoUrl: String? = null // URL de la foto de perfil, puede ser nula
 )
