@@ -5,6 +5,7 @@ package com.dls.chatcompose2.data.firebase
 import android.app.Activity
 import android.content.IntentSender
 import android.util.Log
+import com.dls.chatcompose2.data.firebase.Commons.GOOGLE_WEB_CLIENT_ID
 import com.dls.chatcompose2.domain.model.User
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -35,7 +36,7 @@ class GoogleSignInClient (
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
                     // Web Client ID obtenido desde Firebase Console > Authentication > Google
-                    .setServerClientId("313641142495-80q106s3t6gqvm9umssjvs6uoogbtodj.apps.googleusercontent.com")
+                    .setServerClientId(GOOGLE_WEB_CLIENT_ID)
                     .setFilterByAuthorizedAccounts(false)
                     .build()
             )

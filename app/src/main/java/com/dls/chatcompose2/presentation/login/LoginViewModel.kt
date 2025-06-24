@@ -1,11 +1,11 @@
 package com.dls.chatcompose2.presentation.login
 
-import android.content.IntentSender
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dls.chatcompose2.domain.repository.AuthRepository
 import com.dls.chatcompose2.domain.use_case.auth.LoginUseCase
+import com.google.android.gms.auth.api.identity.SignInCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,12 +50,12 @@ class LoginViewModel @Inject constructor(
     /**
      * Recibe el intent del SignIn de Google y ejecuta el login
      */
-    fun onGoogleSignInIntent(intent: IntentSender) {
+    fun onGoogleSignInResult(credential: SignInCredential) {
         viewModelScope.launch {
-            Log.d("LoginViewModel", "Recibido intent de Google")
+            Log.d("LoginViewModel", "Procesando resultado de Google Sign-In")
             _loginState.value = LoginState(isLoading = true)
 
-            val result = authRepository.signInWithGoogleIntent(intent)
+            val result = authRepository.signInWithGoogle(credential)
             _loginState.value = if (result.isSuccess) {
                 Log.d("LoginViewModel", "Login con Google exitoso")
                 LoginState(success = true)
@@ -65,6 +65,8 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
+
+
 }
 
 

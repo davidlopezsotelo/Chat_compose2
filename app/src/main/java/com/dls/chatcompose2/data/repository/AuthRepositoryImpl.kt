@@ -82,13 +82,4 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun signInWithGoogleIntent(intent: IntentSender): Result<Unit> {
-        return try {
-            auth.signInWithCustomToken(intent.toString())
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-
-    }
 }

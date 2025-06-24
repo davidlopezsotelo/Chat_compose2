@@ -1,28 +1,15 @@
+@file:Suppress("DEPRECATION")
+
 package com.dls.chatcompose2.ui.screens.auth
 
 import android.app.Activity
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,10 +17,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.dls.chatcompose2.data.firebase.GoogleSignInClient
+import com.dls.chatcompose2.data.firebase.Commons.GOOGLE_WEB_CLIENT_ID
 import com.dls.chatcompose2.presentation.login.LoginViewModel
-import kotlinx.coroutines.launch
-
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.common.api.ApiException
 
 @Composable
 fun LoginScreen(
@@ -41,13 +29,51 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val activity = context as? Activity
-    val googleSignInClient = remember { activity?.let { GoogleSignInClient(it) } }
+    val loginState by viewModel.loginState.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val loginState by viewModel.loginState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
+
+    val signInClient = remember { Identity.getSignInClient(context) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                try {
+                    val credential = Identity.getSignInClient(context)
+                        .getSignInCredentialFromIntent(result.data)
+                    viewModel.onGoogleSignInResult(credential)
+                } catch (e: Exception) {
+                    Log.e("LoginScreen", "Error al obtener credencial de Google: ${e.localizedMessage}")
+                }
+            }
+        }
+    )
+
+
+    rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            try {
+                val credential = Identity.getSignInClient(context)
+                    .getSignInCredentialFromIntent(result.data)
+                viewModel.onGoogleSignInResult(credential)
+            } catch (e: ApiException) {
+                Log.e("LoginScreen", "Google sign-in failed", e)
+            }
+        }
+    }
+
+    LaunchedEffect(loginState.success) {
+        if (loginState.success) {
+            Log.d("LoginScreen", "Login exitoso, navegando a Home")
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -58,14 +84,12 @@ fun LoginScreen(
     ) {
         Text("Iniciar sesión", style = MaterialTheme.typography.headlineMedium)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Correo electrónico") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Email") }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -74,66 +98,63 @@ fun LoginScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text("Contraseña") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            visualTransformation = PasswordVisualTransformation()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                Log.d("LoginScreen", "Iniciando login con email y contraseña")
-                coroutineScope.launch {
-                    viewModel.login(email.trim(), password)
+        Button(onClick = { viewModel.login(email, password) }) {
+            Text("Login con Email")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(onClick = {
+            // Lanzar el intent de Google Sign-In
+            val request = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(
+                    BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        .setServerClientId(GOOGLE_WEB_CLIENT_ID) // Reemplaza con tu Client ID de Firebase
+                        .setFilterByAuthorizedAccounts(false)
+                        .build()
+                )
+                .setAutoSelectEnabled(true)
+                .build()
+
+            signInClient.beginSignIn(request)
+                .addOnSuccessListener { result ->
+                    try {
+                        launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
+                    } catch (e: Exception) {
+                        Log.e("LoginScreen", "Error al lanzar Google Sign-In: ${e.localizedMessage}")
+                    }
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
+                .addOnFailureListener {
+                    Log.e("LoginScreen", "Fallo al iniciar sesión con Google: ${it.localizedMessage}")
+                }
+
+        }
         ) {
-            Text("Entrar")
+            Text("Login con Google")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {
-            coroutineScope.launch {
-                googleSignInClient?.getSignInIntent()?.let { intent ->
-                    Log.d("LoginScreen", "Iniciando intent de Google Sign-In")
-                    viewModel.onGoogleSignInIntent(intent)
-                }
-            }
-        }, modifier = Modifier.fillMaxWidth()) {
-            Text("Iniciar sesión con Google")
-        }
-
-        if (loginState.error != null) {
-            Text(
-                text = loginState.error ?: "",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+        TextButton(onClick = { navController.navigate("register") }) {
+            Text("¿No tienes cuenta? Regístrate")
         }
 
         if (loginState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextButton(onClick = {
-            Log.d("LoginScreen", "Navegando a Register")
-            navController.navigate("register")
-        }) {
-            Text("¿No tienes cuenta? Regístrate")
-        }
-    }
-
-    LaunchedEffect(loginState.success) {
-        if (loginState.success) {
-            Log.d("LoginScreen", "Login exitoso, navegando a Home")
-            navController.navigate("home") {
-                popUpTo("login") { inclusive = true }
-            }
+        loginState.error?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 16.dp)
+            )
         }
     }
 }
