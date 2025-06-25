@@ -1,8 +1,6 @@
 package com.dls.chatcompose2.ui.screens.auth
 
 import android.net.Uri
-import android.widget.Toast
-
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -18,6 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.dls.chatcompose2.R
 import com.dls.chatcompose2.presentation.home.UserViewModel
@@ -41,9 +43,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun UserEditScreen(
-    viewModel: UserViewModel = hiltViewModel(),
-    onUserUpdated: () -> Unit,
-    onCancel: () -> Unit
+    navController: NavHostController,
+    viewModel: UserViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val userState by viewModel.userState.collectAsState()
@@ -59,69 +60,89 @@ fun UserEditScreen(
     var name by remember { mutableStateOf(userState?.name ?: "") }
     var email by remember { mutableStateOf(userState?.email ?: "") }
 
-    Column(Modifier.padding(16.dp)) {
-        Text("Editar perfil", style = MaterialTheme.typography.titleLarge)
+    // CORRECTO EN MATERIAL 3:
+    val snackbarHostState = remember { SnackbarHostState() }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clickable { imagePickerLauncher.launch("image/*") },
-            contentAlignment = Alignment.Center
-        ) {
-            if (imageUri.value != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = imageUri.value),
-                    contentDescription = "Selected Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.default_user),
-                    contentDescription = "Default Profile Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            // Puedes poner aquí tu TopAppBar si quieres
         }
-
-        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") })
-        OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, enabled = false)
-        OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Teléfono") })
-        OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text("Dirección") })
-        OutlinedTextField(value = occupation, onValueChange = { occupation = it }, label = { Text("Ocupación") })
-
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Button(onClick = onCancel) {
-                Text("Cancelar")
+    ) { innerPadding ->
+        Column(
+            Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            Text("Editar perfil", style = MaterialTheme.typography.titleLarge)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clickable { imagePickerLauncher.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
+                if (imageUri.value != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = imageUri.value),
+                        contentDescription = "Selected Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.default_user),
+                        contentDescription = "Default Profile Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
 
-            Button(onClick = {
-                userState?.let {
-                    val updatedUser = it.copy(
-                        name = name,
-                        phone = userState?.phone ?: "",
-                        address = userState?.address ?: "",
-                        occupation = userState?.occupation ?: ""
-                    )
-                    CoroutineScope(Dispatchers.Main).launch {
-                        try {
-                            val result : Result<Unit> = viewModel.updateUser(updatedUser, imageUri.value)
-                            if (result.isSuccess) {
-                                Toast.makeText(context, "✅ Perfil actualizado", Toast.LENGTH_SHORT).show()
-                                onUserUpdated()
-                            } else {
-                                Toast.makeText(context, "❌ Error: ${result.exceptionOrNull()?.localizedMessage ?: "Error desconocido"}", Toast.LENGTH_LONG).show()
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") })
+            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, enabled = false)
+            OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Teléfono") })
+            OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text("Dirección") })
+            OutlinedTextField(value = occupation, onValueChange = { occupation = it }, label = { Text("Ocupación") })
+
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Button(onClick = { navController.popBackStack() }) {
+                    Text("Cancelar")
+                }
+
+                Button(onClick = {
+                    userState?.let {
+                        val updatedUser = it.copy(
+                            name = name,
+                            phone = phone,
+                            address = address,
+                            occupation = occupation
+                        )
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                val result: Result<Unit> = viewModel.updateUser(updatedUser, imageUri.value)
+                                if (result.isSuccess) {
+                                    snackbarHostState.showSnackbar("✅ Perfil actualizado")
+                                    navController.popBackStack()
+                                } else {
+                                    snackbarHostState.showSnackbar(
+                                        "❌ Error: ${result.exceptionOrNull()?.localizedMessage ?: "Error desconocido"}"
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                snackbarHostState.showSnackbar("❌ Excepción: ${e.localizedMessage}")
                             }
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "❌ Excepción: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
                         }
                     }
+                }) {
+                    Text("Guardar")
                 }
-            }) {
-                Text("Guardar")
             }
         }
     }
 }
+
+
+
+
+
