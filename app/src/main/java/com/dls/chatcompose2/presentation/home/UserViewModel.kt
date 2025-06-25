@@ -7,16 +7,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dls.chatcompose2.domain.model.User
 import com.dls.chatcompose2.domain.repository.AuthRepository
+import com.dls.chatcompose2.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.Result.Companion.failure
 import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _userState = MutableStateFlow<User?>(null)
@@ -24,6 +27,9 @@ class UserViewModel @Inject constructor(
 
     private val _logoutSuccess = MutableStateFlow(false)
     val logoutSuccess: StateFlow<Boolean> = _logoutSuccess
+
+    private val _contactList = MutableStateFlow<List<User>>(emptyList())
+    val contactList: StateFlow<List<User>> = _contactList.asStateFlow()
 
     init {
         fetchCurrentUser()
@@ -48,6 +54,19 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+
+    fun fetchContacts() {
+        viewModelScope.launch {
+            val result = userRepository.getAllUsers()
+            if (result.isSuccess) {
+                _contactList.value = result.getOrDefault(emptyList())
+                Log.d("UserViewModel", "✅ Contactos cargados: ${_contactList.value.size}")
+            } else {
+                Log.e("UserViewModel", "❌ Error al cargar contactos: ${result.exceptionOrNull()?.localizedMessage}")
+            }
+        }
+    }
+
     suspend fun updateUser(user: User, newPhotoUri: Uri? = null): Result<Unit> {
         return try {
             val updatedUser = if (newPhotoUri != null) {
@@ -77,6 +96,7 @@ class UserViewModel @Inject constructor(
             failure(e)
         }
     }
+
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()

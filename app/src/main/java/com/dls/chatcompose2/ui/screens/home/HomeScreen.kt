@@ -1,50 +1,90 @@
 package com.dls.chatcompose2.ui.screens.home
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.dls.chatcompose2.ui.navigation.Screen
+import com.dls.chatcompose2.R
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    // Estado local para resaltar el botón seleccionado
+    var selectedItem by remember { mutableStateOf(0) }
 
+    val items = listOf("user", "contacts", "chats")
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Home Screen", style = MaterialTheme.typography.headlineSmall)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = {
-            Log.d("HomeScreen", "Volviendo al Login")
-            navController.navigate(Screen.Login.route) {
-                popUpTo(Screen.Login.route) { inclusive = true }
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Person, contentDescription = "Usuario") },
+                    label = { Text("Usuario") },
+                    selected = selectedItem == 0,
+                    onClick = {
+                        selectedItem = 0
+                        navController.navigate("user")
+                    }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Contactos") },
+                    label = { Text("Contactos") },
+                    selected = selectedItem == 1,
+                    onClick = {
+                        selectedItem = 1
+                        navController.navigate("contacts") // A implementar
+                    }
+                )
+                NavigationBarItem(
+                    icon = { Icon(painter = painterResource(id = R.drawable.ic_chat), contentDescription = "Chats") },
+                    label = { Text("Chats") },
+                    selected = selectedItem == 2,
+                    onClick = {
+                        selectedItem = 2
+                        navController.navigate("chats") // A implementar
+                    }
+                )
             }
-        }) {
-            Text("Cerrar sesión")
         }
-        Spacer(modifier = Modifier.height(16.dp))
+    ) { padding ->
+        // Contenido principal del HomeScreen
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "Pantalla Principal", style = MaterialTheme.typography.headlineSmall)
 
-        Button(onClick = {
-            Log.d("HomeScreen", "Editar perfil")
-            navController.navigate("edit_user")
-        }) {
-            Text("Editar perfil")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = {
+                Log.d("HomeScreen", "Cerrar sesión")
+                navController.navigate("login") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }) {
+                Text("Cerrar sesión")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = {
+                Log.d("HomeScreen", "Editar perfil")
+                navController.navigate("edit_user")
+            }) {
+                Text("Editar perfil")
+            }
         }
     }
 }
+

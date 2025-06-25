@@ -14,6 +14,8 @@ import com.dls.chatcompose2.ui.screens.auth.LoginScreen
 import com.dls.chatcompose2.ui.screens.auth.RegisterScreen
 import com.dls.chatcompose2.ui.screens.auth.UserEditScreen
 import com.dls.chatcompose2.ui.screens.auth.UserScreen
+import com.dls.chatcompose2.ui.screens.chats.ChatsScreen
+import com.dls.chatcompose2.ui.screens.contacts.ContactsScreen
 import com.dls.chatcompose2.ui.screens.home.HomeScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 
@@ -38,6 +40,8 @@ fun NavGraph(navController: NavHostController) {
         composable("home") { HomeScreen(navController) }
         composable("user") { UserScreen(navController = navController) }
         composable("edit_user") { UserEditScreen(navController = navController) }
+        composable("contacts") { ContactsScreen(navController = navController) }
+        composable("chats") { ChatsScreen(navController = navController) }
     }
 
 
