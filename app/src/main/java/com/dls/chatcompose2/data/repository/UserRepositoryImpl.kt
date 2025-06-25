@@ -25,4 +25,13 @@ class UserRepositoryImpl @Inject constructor(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    override suspend fun getUserById(uid: String): Result<User> = try {
+        val doc = firestore.collection("users").document(uid).get().await()
+        val user = doc.toObject(User::class.java)
+        if (user != null) Result.success(user)
+        else Result.failure(Exception("Usuario no encontrado"))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }

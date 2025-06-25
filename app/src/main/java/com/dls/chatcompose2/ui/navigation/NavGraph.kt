@@ -8,13 +8,13 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dls.chatcompose2.ui.screens.auth.LoginScreen
 import com.dls.chatcompose2.ui.screens.auth.RegisterScreen
 import com.dls.chatcompose2.ui.screens.auth.UserEditScreen
 import com.dls.chatcompose2.ui.screens.auth.UserScreen
-import com.dls.chatcompose2.ui.screens.chats.ChatsScreen
+import com.dls.chatcompose2.ui.screens.chats.ChatListScreen
+import com.dls.chatcompose2.ui.screens.chats.ChatScreen
 import com.dls.chatcompose2.ui.screens.contacts.ContactsScreen
 import com.dls.chatcompose2.ui.screens.home.HomeScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -41,33 +41,16 @@ fun NavGraph(navController: NavHostController) {
         composable("user") { UserScreen(navController = navController) }
         composable("edit_user") { UserEditScreen(navController = navController) }
         composable("contacts") { ContactsScreen(navController = navController) }
-        composable("chats") { ChatsScreen(navController = navController) }
+      //  composable("chats") { ChatScreen(navController = navController) }
+        composable("chatlist") { ChatListScreen(navController = navController) }
+
+
+        composable("chat/{uid}") { backStackEntry ->
+            val contactUid = backStackEntry.arguments?.getString("uid")
+            contactUid?.let {
+                ChatScreen(navController = navController, contactUid = it)
+            }
+        }
     }
-
-
-
-    // version anterior:
-
-//    NavHost(navController = navController, startDestination = Screen.Login.route) {
-//        composable(route = Screen.Login.route) {
-//            Log.d("NavGraph", "Mostrando LoginScreen")
-//            LoginScreen(navController = navController)
-//        }
-//        composable(route = Screen.Register.route) {
-//            Log.d("NavGraph", "Mostrando RegisterScreen")
-//            RegisterScreen(navController = navController)
-//        }
-//        composable(route = Screen.Home.route) {
-//            Log.d("NavGraph", "Mostrando HomeScreen")
-//            HomeScreen(navController = navController)
-//        }
-//
-//        composable("edit_user") {
-//            UserEditScreen(
-//                onUserUpdated = { navController.popBackStack() },
-//                onCancel = { navController.popBackStack() }
-//            )
-//        }
-//
-//    }
 }
+

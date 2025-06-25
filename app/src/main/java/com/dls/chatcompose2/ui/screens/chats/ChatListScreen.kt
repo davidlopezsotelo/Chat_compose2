@@ -1,11 +1,11 @@
-package com.dls.chatcompose2.ui.screens.contacts
+package com.dls.chatcompose2.ui.screens.chats
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -19,22 +19,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.dls.chatcompose2.R
-import com.dls.chatcompose2.presentation.home.UserViewModel
+import com.dls.chatcompose2.domain.model.User
+import com.dls.chatcompose2.presentation.chat.ChatListViewModel
 import com.dls.chatcompose2.ui.components.MainScaffold
 
 @Composable
-fun ContactsScreen(
+fun ChatListScreen(
     navController: NavController,
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: ChatListViewModel = hiltViewModel()
 ) {
-    val contacts by viewModel.contactList.collectAsState()
+    val activeChats by viewModel.chatContacts.collectAsState()
 
-    // Al iniciar la pantalla, cargar los usuarios
     LaunchedEffect(Unit) {
-        viewModel.fetchContacts()
+        viewModel.loadChatContacts()
     }
 
-    MainScaffold(navController = navController, currentRoute = "contacts") { padding ->
+    MainScaffold(navController = navController, currentRoute = "chats") { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -42,14 +42,14 @@ fun ContactsScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Contactos",
+                text = "Chats activos",
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(contacts) { user ->
-                    ContactItem(user = user) {
+                items(activeChats) { user ->
+                    ChatPreviewItem(user = user) {
                         navController.navigate("chat/${user.uid}")
                     }
                 }
@@ -59,7 +59,7 @@ fun ContactsScreen(
 }
 
 @Composable
-fun ContactItem(user: com.dls.chatcompose2.domain.model.User, onClick: () -> Unit) {
+fun ChatPreviewItem(user: User, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,7 +73,7 @@ fun ContactItem(user: com.dls.chatcompose2.domain.model.User, onClick: () -> Uni
                 placeholder = painterResource(id = R.drawable.default_user),
                 error = painterResource(id = R.drawable.default_user)
             ),
-            contentDescription = "Foto de ${user.name}",
+            contentDescription = "Imagen de ${user.name}",
             modifier = Modifier
                 .size(64.dp)
                 .clip(CircleShape)
@@ -82,8 +82,10 @@ fun ContactItem(user: com.dls.chatcompose2.domain.model.User, onClick: () -> Uni
         Spacer(modifier = Modifier.width(16.dp))
 
         Text(
-            text = user.name ?: "Sin nombre",
+            text = user.name ?: "Usuario",
             style = MaterialTheme.typography.bodyLarge
         )
     }
 }
+
+

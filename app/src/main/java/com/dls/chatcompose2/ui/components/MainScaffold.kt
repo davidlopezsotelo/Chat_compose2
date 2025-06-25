@@ -38,8 +38,11 @@ fun MainScaffold(
                     icon = { Icon(painter = painterResource(id = R.drawable.ic_chat), contentDescription = "Chats") },
                     label = { Text("Chats") },
                     selected = selectedIndex == 2,
-                    onClick = { navController.navigate("chats") }
+                    onClick = {
+                        navController.navigate("chatlist")
+                    }
                 )
+
             }
         },
         content = content
