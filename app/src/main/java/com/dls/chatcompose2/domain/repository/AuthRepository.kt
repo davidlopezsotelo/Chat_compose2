@@ -52,6 +52,6 @@ interface AuthRepository {
 
     suspend fun getUserFromFirestore(userId: String): Result<User>
 
-    suspend fun uploadProfilePicture(uri: Uri, userId: String): String
+    suspend fun uploadProfilePicture(userId: String, imageUri: Uri): Result<String>
 
 }

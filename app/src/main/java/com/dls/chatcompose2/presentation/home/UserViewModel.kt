@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.Result.Companion.failure
-import kotlin.Result.Companion.success
-import kotlin.runCatching
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,7 +51,11 @@ class UserViewModel @Inject constructor(
     suspend fun updateUser(user: User, newPhotoUri: Uri? = null): Result<Unit> {
         return try {
             val updatedUser = if (newPhotoUri != null) {
-                val photoUrl = authRepository.uploadProfilePicture(newPhotoUri, user.uid)
+                val photoUrlResult = authRepository.uploadProfilePicture(user.uid, newPhotoUri)
+                val photoUrl = photoUrlResult.getOrElse {
+                    Log.e("UserViewModel", "❌ Error al subir foto: ${it.localizedMessage}")
+                    return failure(it)
+                }
                 user.copy(photoUrl = photoUrl)
             } else {
                 user

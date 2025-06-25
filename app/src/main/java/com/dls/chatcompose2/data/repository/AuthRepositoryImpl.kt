@@ -2,7 +2,6 @@
 
 package com.dls.chatcompose2.data.repository
 
-import android.content.IntentSender
 import android.net.Uri
 import android.util.Log
 import com.dls.chatcompose2.domain.model.User
@@ -12,13 +11,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
 class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) : AuthRepository {
 
     override suspend fun loginWithEmailAndPassword(email: String, password: String): Result<Unit> {
@@ -102,11 +103,19 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun uploadProfilePicture(
-        uri: Uri,
-        userId: String
-    ): String {
-        TODO("Not yet implemented")
+    override suspend fun uploadProfilePicture(userId: String, imageUri: Uri): Result<String> {
+        return try {
+            val storageRef = storage.reference.child("profile_pictures/$userId.jpg")
+            storageRef.putFile(imageUri).await()
+            val downloadUrl = storageRef.downloadUrl.await().toString()
+            Log.d("AuthRepository", "✅ Imagen subida: $downloadUrl")
+            Result.success(downloadUrl)
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "❌ Error subiendo imagen: ${e.localizedMessage}")
+            Result.failure(e)
+        }
     }
+
+
 
 }

@@ -53,9 +53,9 @@ fun UserEditScreen(
         uri?.let { imageUri.value = it }
     }
 
-//    var phone by remember { mutableStateOf(userState?.phone ?: "") }
-//    var address by remember { mutableStateOf(userState?.address ?: "") }
-//    var occupation by remember { mutableStateOf(userState?.occupation ?: "") }
+    var phone by remember { mutableStateOf(userState?.phone ?: "") }
+    var address by remember { mutableStateOf(userState?.address ?: "") }
+    var occupation by remember { mutableStateOf(userState?.occupation ?: "") }
     var name by remember { mutableStateOf(userState?.name ?: "") }
     var email by remember { mutableStateOf(userState?.email ?: "") }
 
@@ -88,9 +88,9 @@ fun UserEditScreen(
 
         OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") })
         OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, enabled = false)
-//        OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Teléfono") })
-//        OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text("Dirección") })
-//        OutlinedTextField(value = occupation, onValueChange = { occupation = it }, label = { Text("Ocupación") })
+        OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Teléfono") })
+        OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text("Dirección") })
+        OutlinedTextField(value = occupation, onValueChange = { occupation = it }, label = { Text("Ocupación") })
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Button(onClick = onCancel) {
@@ -101,9 +101,9 @@ fun UserEditScreen(
                 userState?.let {
                     val updatedUser = it.copy(
                         name = name,
-//                        phone = userState?.phone ?: "",
-//                        address = userState?.address ?: "",
-//                        occupation = userState?.occupation ?: ""
+                        phone = userState?.phone ?: "",
+                        address = userState?.address ?: "",
+                        occupation = userState?.occupation ?: ""
                     )
                     CoroutineScope(Dispatchers.Main).launch {
                         try {
