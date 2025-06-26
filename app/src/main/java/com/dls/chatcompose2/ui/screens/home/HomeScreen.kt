@@ -17,13 +17,14 @@ import com.dls.chatcompose2.R
 @Composable
 fun HomeScreen(navController: NavController) {
     // Estado local para resaltar el botón seleccionado
-    var selectedItem by remember { mutableStateOf(0) }
+    var selectedItem by remember { mutableIntStateOf(0) }
 
-    val items = listOf("user", "contacts", "chats")
+    listOf("user", "contacts", "chats")
 
     Scaffold(
         bottomBar = {
             NavigationBar {
+                // Botón de usuario
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Person, contentDescription = "Usuario") },
                     label = { Text("Usuario") },
@@ -33,22 +34,24 @@ fun HomeScreen(navController: NavController) {
                         navController.navigate("user")
                     }
                 )
+                // Botón de contactos
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Contactos") },
                     label = { Text("Contactos") },
                     selected = selectedItem == 1,
                     onClick = {
                         selectedItem = 1
-                        navController.navigate("contacts") // A implementar
+                        navController.navigate("contacts")
                     }
                 )
+                // Botón de chats
                 NavigationBarItem(
                     icon = { Icon(painter = painterResource(id = R.drawable.ic_chat), contentDescription = "Chats") },
                     label = { Text("Chats") },
                     selected = selectedItem == 2,
                     onClick = {
                         selectedItem = 2
-                        navController.navigate("chats") // A implementar
+                        navController.navigate("chats")
                     }
                 )
             }

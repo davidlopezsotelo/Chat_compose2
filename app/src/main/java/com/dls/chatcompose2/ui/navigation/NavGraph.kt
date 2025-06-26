@@ -41,8 +41,10 @@ fun NavGraph(navController: NavHostController) {
         composable("user") { UserScreen(navController = navController) }
         composable("edit_user") { UserEditScreen(navController = navController) }
         composable("contacts") { ContactsScreen(navController = navController) }
-      //  composable("chats") { ChatScreen(navController = navController) }
         composable("chatlist") { ChatListScreen(navController = navController) }
+        composable("chats") {
+            ChatListScreen(navController = navController)
+        }
 
 
         composable("chat/{uid}") { backStackEntry ->

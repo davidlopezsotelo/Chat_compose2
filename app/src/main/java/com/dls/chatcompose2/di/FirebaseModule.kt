@@ -49,16 +49,16 @@ object FirebaseModule {
         return instance
     }
 
-    /**
-     * Provee la instancia de FirebaseDatabase (Realtime Database, ideal para chat)
-     */
-    @Provides
-    @Singleton
-    fun provideFirebaseDatabase(): FirebaseDatabase {
-        val instance = FirebaseDatabase.getInstance()
-        Log.d(TAG, "✅ FirebaseDatabase proporcionado: ${instance.app.name}")
-        return instance
-    }
+//    /**
+//     * Provee la instancia de FirebaseDatabase (Realtime Database, ideal para chat)
+//     */
+//    @Provides
+//    @Singleton
+//    fun provideFirebaseDatabase(): FirebaseDatabase {
+//        val instance = FirebaseDatabase.getInstance()
+//        Log.d(TAG, "✅ FirebaseDatabase proporcionado: ${instance.app.name}")
+//        return instance
+//    }
 
     /**
      * Provee la instancia de FirebaseStorage (almacenamiento multimedia)
@@ -70,6 +70,11 @@ object FirebaseModule {
         Log.d(TAG, "✅ FirebaseStorage proporcionado: ${instance.app.name}")
         return instance
     }
+    @Provides
+    @Singleton
+    fun provideRealtimeDatabase(): FirebaseDatabase =
+        FirebaseDatabase.getInstance("https://chatcompose2-a2660-default-rtdb.europe-west1.firebasedatabase.app/")
+
 }
 
 
