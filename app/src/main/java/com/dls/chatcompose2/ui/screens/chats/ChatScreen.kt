@@ -1,5 +1,6 @@
 package com.dls.chatcompose2.ui.screens.chats
 
+import android.R.style
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -8,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -24,6 +26,9 @@ import coil.compose.rememberAsyncImagePainter
 import com.dls.chatcompose2.presentation.chat.ChatViewModel
 import com.dls.chatcompose2.ui.components.MainScaffold
 import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ChatScreen(
@@ -35,6 +40,8 @@ fun ChatScreen(
     val messages by viewModel.messages.collectAsState()
     var messageText by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val listState = rememberLazyListState() // Estado para la lista de mensajes
+
 
     // Launcher para seleccionar imagen
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -63,17 +70,30 @@ fun ChatScreen(
                 )
             }
 
+
             // 📨 Lista de mensajes
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(messages) { msg ->
+                    // muestra solo hora.
+                    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+                    val date = Date(msg.timestamp)
+                    val formattedTime = timeFormat.format(date)
+                    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+                    val formattedDate = dateFormat.format(date)
+
                     val isMe = msg.senderId == FirebaseAuth.getInstance().currentUser?.uid
+
+
+
                     Box(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = 4.dp),
                         contentAlignment = if (isMe) Alignment.CenterEnd else Alignment.CenterStart
                     ) {        Column(
                         modifier = Modifier
@@ -95,12 +115,38 @@ fun ChatScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                         if (msg.text.isNotBlank()) {
-                            Text(text = msg.text)
+                            Text(text = msg.text,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        // fecha y hor (alineados en fila)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(end = 4.dp),
+                                text = dateFormat.format(Date(msg.timestamp)),
+                                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                            )
+
+                            Text(
+                                text = timeFormat.format(Date(msg.timestamp)),
+                                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                            )
                         }
                     }
+                 }
+                    LaunchedEffect(messages.size) {
+                        if (messages.isNotEmpty()) {
+                            listState.animateScrollToItem(messages.size - 1)
+                        }
                     }
-                }
             }
+        }
 
             Spacer(modifier = Modifier.height(8.dp))
 
