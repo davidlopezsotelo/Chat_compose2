@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -82,17 +83,113 @@ fun ChatScreen(
                 items(messages) { msg ->
                     // muestra solo hora.
                     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
-                    val date = Date(msg.timestamp)
-                    val formattedTime = timeFormat.format(date)
+                    //val date = Date(msg.timestamp)
+                    //val formattedTime = timeFormat.format(date)
                     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
-                    val formattedDate = dateFormat.format(date)
+                  //  val formattedDate = dateFormat.format(date)
 
                     val isMe = msg.senderId == FirebaseAuth.getInstance().currentUser?.uid
 
 
+                  //  val isMe = msg.senderId == FirebaseAuth.getInstance().currentUser?.uid
+                    val date = dateFormat.format(Date(msg.timestamp))
+                    val time = timeFormat.format(Date(msg.timestamp))
+
+
+//
+//                    Column(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(vertical = 6.dp),
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        // Fecha centrada arriba del mensaje
+//                        Text(
+//                            text = date,
+//                            style = MaterialTheme.typography.labelSmall.copy(
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+//                            )
+//                        )
+//
+//                        // Contenedor del mensaje alineado izquierda/derecha
+//                        Box(
+//                            modifier = Modifier
+//                                .fillMaxWidth(),
+//                            contentAlignment = if (isMe) Alignment.CenterEnd else Alignment.CenterStart
+//                        ) {
+//                            Column(
+//                                modifier = Modifier
+//                                    .background(
+//                                        if (isMe) MaterialTheme.colorScheme.primaryContainer
+//                                        else MaterialTheme.colorScheme.surfaceVariant
+//                                    )
+//                                    .padding(12.dp)
+//                                    .clip(MaterialTheme.shapes.medium)
+//                                    .widthIn(max = 280.dp)
+//                            ) {
+//                                msg.imageUrl?.let { imageUrl ->
+//                                    Image(
+//                                        painter = rememberAsyncImagePainter(model = imageUrl),
+//                                        contentDescription = "Imagen enviada",
+//                                        modifier = Modifier
+//                                            .fillMaxWidth()
+//                                            .clip(MaterialTheme.shapes.medium)
+//                                    )
+//                                    Spacer(modifier = Modifier.height(4.dp))
+//                                }
+//
+//                                if (msg.text.isNotBlank()) {
+//                                    Text(
+//                                        text = msg.text,
+//                                        style = MaterialTheme.typography.bodyMedium
+//                                    )
+//                                }
+//                            }
+//                        }
+//
+//                        // Hora alineada a la derecha del mensaje
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(horizontal = 16.dp, vertical = 2.dp),
+//                            horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start
+//                        ) {
+//                            Text(
+//                                text = time,
+//                                style = MaterialTheme.typography.labelSmall.copy(
+//                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+//                                )
+//                            )
+//                        }
+//                    }
+
+
+
+
+
+
+
+
+                    //fecha
 
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = dateFormat.format(Date(msg.timestamp)),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+
+
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         contentAlignment = if (isMe) Alignment.CenterEnd else Alignment.CenterStart
                     ) {        Column(
@@ -102,6 +199,8 @@ fun ChatScreen(
                                 else MaterialTheme.colorScheme.surfaceVariant
                             )
                             .padding(12.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .widthIn(max = 280.dp) // 👈 muy importante para evitar que el mensaje crezca de más
                     ) {
                         msg.imageUrl?.let { imageUrl ->
                             Log.d("ChatScreen", "Mostrando imagen: $imageUrl")
@@ -120,26 +219,26 @@ fun ChatScreen(
                             )
                         }
 
-                        // fecha y hor (alineados en fila)
-                        Row(
+                        //hora
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
+                               .fillMaxSize()
                                 .padding(top = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            contentAlignment = Alignment.BottomEnd
                         ) {
                             Text(
-                                modifier = Modifier.padding(end = 4.dp),
-                                text = dateFormat.format(Date(msg.timestamp)),
-                                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                            )
-
-                            Text(
                                 text = timeFormat.format(Date(msg.timestamp)),
-                                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
                             )
                         }
-                    }
+                      }
                  }
+
+
+
+
                     LaunchedEffect(messages.size) {
                         if (messages.isNotEmpty()) {
                             listState.animateScrollToItem(messages.size - 1)
