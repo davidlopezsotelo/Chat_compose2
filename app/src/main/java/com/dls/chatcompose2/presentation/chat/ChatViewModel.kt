@@ -1,5 +1,6 @@
 package com.dls.chatcompose2.presentation.chat
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,6 +30,7 @@ class ChatViewModel @Inject constructor(
 
     private var chatId: String? = null
 
+    // Función para cargar el contacto
     fun loadContact(uid: String) {
         viewModelScope.launch {
             val result = userRepository.getUserById(uid)
@@ -41,6 +43,7 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    // Función para comenzar a observar los mensajes
     private fun startObservingMessages(contactUid: String) {
         val senderUid = auth.currentUser?.uid ?: return
         chatId = listOf(senderUid, contactUid).sorted().joinToString("_")
@@ -52,6 +55,7 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    // Función para enviar un mensaje
     fun sendMessage(text: String) {
         val receiver = contact.value ?: return
         val senderId = auth.currentUser?.uid ?: return
@@ -67,5 +71,27 @@ class ChatViewModel @Inject constructor(
             messageRepository.sendMessage(message)
         }
     }
+
+    // Función para enviar una imagen
+    fun sendImage(uri: Uri) {
+        val receiver = contact.value ?: return
+        val senderId = auth.currentUser?.uid ?: return
+        val chatId = listOf(senderId, receiver.uid).sorted().joinToString("_")
+
+        viewModelScope.launch {
+            val result = messageRepository.uploadImage(uri, chatId)
+            result.onSuccess { url ->
+                val message = ChatMessage(
+                    senderId = senderId,
+                    receiverId = receiver.uid,
+                    text = "",
+                    imageUrl = url,
+                    timestamp = System.currentTimeMillis()
+                )
+                messageRepository.sendMessage(message)
+            }
+        }
+    }
+
 }
 

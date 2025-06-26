@@ -1,5 +1,9 @@
 package com.dls.chatcompose2.ui.screens.chats
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,9 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.dls.chatcompose2.presentation.chat.ChatViewModel
 import com.dls.chatcompose2.ui.components.MainScaffold
 import com.google.firebase.auth.FirebaseAuth
@@ -27,6 +34,15 @@ fun ChatScreen(
     val contact by viewModel.contact.collectAsState()
     val messages by viewModel.messages.collectAsState()
     var messageText by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    // Launcher para seleccionar imagen
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let { viewModel.sendImage(it) }
+        }
+    )
 
     LaunchedEffect(contactUid) {
         viewModel.loadContact(contactUid)
@@ -45,7 +61,7 @@ fun ChatScreen(
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-            } ?: Text("Cargando contacto...")
+            }
 
             // 📨 Lista de mensajes
             LazyColumn(
@@ -59,18 +75,29 @@ fun ChatScreen(
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = if (isMe) Alignment.CenterEnd else Alignment.CenterStart
+                    ) {        Column(
+                        modifier = Modifier
+                            .background(
+                                if (isMe) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceVariant
+                            )
+                            .padding(12.dp)
                     ) {
-                        Text(
-                            text = msg.text,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .background(
-                                    if (isMe) MaterialTheme.colorScheme.primaryContainer
-                                    else MaterialTheme.colorScheme.surfaceVariant
-                                )
-                                .padding(12.dp)
-                        )
+                        msg.imageUrl?.let { imageUrl ->
+                            Log.d("ChatScreen", "Mostrando imagen: $imageUrl")
+                            Image(
+                                painter = rememberAsyncImagePainter(model = imageUrl),
+                                contentDescription = "Imagen enviada",
+                                modifier = Modifier
+                                    .size(180.dp)
+                                    .clip(MaterialTheme.shapes.medium)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        if (msg.text.isNotBlank()) {
+                            Text(text = msg.text)
+                        }
+                    }
                     }
                 }
             }
@@ -93,6 +120,12 @@ fun ChatScreen(
                     messageText = ""
                 }) {
                     Text("Enviar")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = {
+                    imagePickerLauncher.launch("image/*")
+                }) {
+                    Text("📷")
                 }
             }
         }
